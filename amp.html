@@ -1,43 +1,52 @@
 <div id="disqus_thread"></div>
 <script>
-window.addEventListener('message', receiveMessage, false);
-function receiveMessage(event)
-{
-    if (event.data) {
-        var msg;
-        try {
-            msg = JSON.parse(event.data);
-        } catch (err) {
-            // Do nothing
-        }
-        if (!msg)
-            return false;
+	window.addEventListener( 'message', receiveMessage, false );
 
-        if (msg.name === 'resize' || msg.name === 'rendered') {
-            window.parent.postMessage({
-              sentinel: 'amp',
-              type: 'embed-size',
-              height: msg.data.height
-            }, '*');
-        }
-    }
-}
+	function receiveMessage( event ) {
+		if ( event.data ) {
+			var msg;
+			try {
+				msg = JSON.parse( event.data );
+			} catch ( err ) {
+				// Do nothing
+			}
+			if ( !msg )
+				return false;
+
+			if ( msg.name === 'resize' || msg.name === 'rendered' || msg.name === 'fakeScroll' ) {
+				setTimeout( function() {
+					window.parent.postMessage( {
+						sentinel: 'amp',
+						type: 'embed-size',
+						height: document.body.scrollHeight
+					}, '*' );
+				}, 10 );
+			}
+		}
+	}
 </script>
 <script>
-    /**
-     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-     */
-    var disqus_config = function () {
-        this.page.url = '<?php echo get_permalink(); ?>';  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = '<?php echo dsq_identifier_for_post($post); ?>'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-    (function() {  // DON'T EDIT BELOW THIS LINE
-        var d = document, s = d.createElement('script');
-
-        s.src = '//horormagoria-2.disqus.com/embed.js';
-
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
+	var url_args = location.search.substr(1).split("&").reduce((o,i)=>(u=decodeURIComponent,[k,v]=i.split("="),o[u(k)]=v&&u(v),o),{} );
+	var disqus_identifier = decodeURIComponent( window.location.hash );
+	disqus_identifier = disqus_identifier.replace( '+', ' ' );
+	disqus_identifier = disqus_identifier.replace( '#', '' );
+	var disqus_domain = "disqus.com";
+	var disqus_shortname = url_args.shortname;
+	var disqus_url = url_args.postlink;
+	var disqus_config = function() {
+		this.page.url = disqus_url;
+		this.page.identifier = disqus_identifier;
+	};
+	(function() {
+		var d = document, s = d.createElement( 'script' );
+		s.src = '//' + disqus_shortname + '.' + disqus_domain + '/embed.js;
+		s.setAttribute( 'data-timestamp', +new Date() );
+		(d.head || d.body).appendChild( s );
+	})();
 </script>
+
+<style>
+	#disqus_thread a {
+		color: #389FFF;
+	}
+</style>
